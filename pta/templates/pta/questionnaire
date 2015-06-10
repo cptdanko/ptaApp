@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Traumatic Amnesia app</title>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+	<script type="text/javascript">
+    <script type="text/javascript">
+        function load(){
+            var element = document.getElementById("cdate");
+            var date = new Date();
+            element.innerHTML = "<strong>"+date.getDate()+"/"+date.getMonth()+1+"/"+date.getFullYear()+"</strong>";
+        }
+        function rightAnswer(id, elem){
+            var label = elem.nextElementSibling;
+            if(elem.checked){
+                label.style.textDecoration ="line-through";
+            } else {
+                label.style.textDecoration ="";
+            }
+        }
+        function selectAllQs(){
+            var checkboxes = document.getElementsByTagName("INPUT");
+            for(var i=0; i<checkboxes.length;i++){
+                if(checkboxes[i].type=="checkbox"){
+                    //checkboxes[i].checked = true;
+                    checkboxes[i].click();
+                }
+            }
+        }
+    </script>
+</head>
+
+<body onload="load()">
+    {% include "pta/navigator.html" %} 
+ <div id="wrapper">
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+			    <h3> Post Traumatic Amnesia assessment <br> questionnaire for patient<br>
+                <i>{{patient.first_name}} {{patient.last_name}} </i></h3>
+                <hr>
+                </div>
+
+            </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-10">
+                    <div class="panel">
+                        <form onsubmit="submit()" action="." method="post" id="id" name="form_name"> {% csrf_token %}
+                            {% for q in questions %}
+                            <p>
+                                  <input onclick="rightAnswer(id, this)" type="checkbox" name="{{q.name}}" id="{{q.id}}" value="{{q.id}}" />
+                                    <label for="{{q.id}}">{{q.name}} </label>
+                            </p>
+
+                            {% endfor %}
+                            
+                            <p style="margin-top:10px;">
+                                <input type="submit" class="btn btn-primary" value="Done" />
+                            </p>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+           </div>
+            
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+</body>
+</html>

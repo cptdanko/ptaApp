@@ -1,0 +1,175 @@
+<html>
+<head>
+    <title>PTA</title>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+
+    <link rel="stylesheet" href="{% static 'css/foundation.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/pta.css' %}" />
+    <script type="text/javascript" src="{% static 'js/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/pta.js' %}"></script>
+    <script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+
+    function createCharts(responses) {
+        var noOfResponses = responses.length;
+        var remainder = (noOfResponses/7).toFixed(2);
+        var divCollection = [];
+        var noOfCharts = Math.floor(remainder);
+        if(remainder != noOfCharts){
+            noOfCharts +=1;
+        }
+ 
+        var prepareDataTable= function(dataTable){
+            dataTable.addColumn("string", "Assessment Date");
+            dataTable.addColumn("number", "Correct Answers");
+            dataTable.addColumn("number", "Total questions");
+       }
+       var options = {
+            title: 'Patient Assessment Progress',
+            hAxis: {title: 'Assessment days', titleTextStyle: {color: 'red'}}
+        };
+  
+        var divChartId = "chart";
+        for(var i= 0; i < noOfCharts; i++){
+            var div = document.createElement("div");
+            div.id = divChartId +"_"+i;
+            div.setAttribute("style","width:900px; height:500px;");
+            document.getElementById("page-wrapper").appendChild(div);
+            //document.body.appendChild(div);
+            var dataTable = new google.visualization.DataTable(); 
+            prepareDataTable(dataTable); 
+            var respLimit = 7;
+            if(responses.length < 7){
+                respLimit = responses.length;
+            }
+            var rowsAdded = false;
+            for(var j=0; j < respLimit; j++) {
+                if(!rowsAdded) {
+                    dataTable.addRows(respLimit);
+                    rowsAdded = true;
+                }
+                var response = responses.pop();
+                dataTable.setValue(j, 0, response.date);
+                dataTable.setValue(j, 1, response.correctAnswers);
+                dataTable.setValue(j, 2,response.totalQuestions);
+            }
+            var chart = new google.visualization.ColumnChart(document.getElementById(div.id));
+            chart.draw(dataTable, options);
+        }
+    }
+    function centerAlignCell(elem){
+        elem.align = "center";
+    }
+    function populateTable(tableId, responses) {
+
+        var addRow = function(table){ return table.insertRow(table.rows.length); }
+        var addCol = function(row, no) { return row.insertCell(no); }
+
+        var cenetreAlignCell = function(cell){
+            cell.align = "center";       
+        }
+
+        var table = document.getElementById(tableId);
+        for(var i=0; i< responses.length; i++) {
+            var resp = responses[i];
+            var row  = addRow(table);
+            //var row = table.insertRow(table.rows.length);
+            var row = addRow(table);
+            var dataCell = addCol(row, 0);
+            //var dateCell = row.insertCell(0);
+            dataCell.innerText = resp.date;
+            var correctAnsCell = addCol(row, 1);
+
+            correctAnsCell.innerText = resp.correctAnswers;
+            correctAnsCell = centerAlignCell(correctAnsCell);
+
+            var totalQuestions = addCol(row, 2);
+            totalQuestions.innerHTML = resp.totalQuestions;
+            totalQuestions = centerAlignCell(totalQuestions);
+
+            var assessingTherapist = addCol(row, 3);
+            assessingTherapist.innerHTML = resp.therapistName;
+            assessingTherapist = centerAlignCell(assessingTherapist);
+        }
+    }
+    function loadCharts(){
+        var rptType = "{{reportType}}";
+        var drawGraphs = true;
+        var drawTables = true;
+        if(rptType == reportTypes.graphOnly) {
+            drawTables = false;
+        }
+        if(rptType == reportTypes.tableOnly){
+            drawGraphs = false;
+        }
+        var responses = []
+        var response = {};
+        var noOfResponses = 0;
+        {% for  r in responses %}
+            var response = {};
+            var datetime = "{{r.date.day}}/{{r.date.month}}/{{r.date.year}} {{r.date.time}}";
+            //console.log(obj);
+            response.date = datetime;
+            response.correctAnswers = {{r.correctAnswers}}
+            response.totalQuestions = {{r.totalQuestions}}
+            response.therapistName = "{{r.staff.first_name}}"+" "+ "{{r.staff.last_name}}"
+            responses.push(response);
+            noOfResponses++;
+        {% endfor %}
+
+        if(drawTables){
+            populateTable("patientRpt", responses);
+        } else {
+            document.getElementById("patientRpt").innerHTML = "";
+        }
+
+        if(drawGraphs) {
+            createCharts(responses);
+        }
+
+        if(noOfResponses == 0){
+            var div = document.createElement("div");
+            div.id = "error";
+            div.setAttribute("style","width:900px; height:500px;");
+            div.innerHTML="<div class='panel'> <h3> Error! Perhaps a new patient, no questions assessments have been done by this patient</h3> </div>";
+            document.getElementById("page-wrapper").innerHTML = "";
+            document.getElementById("page-wrapper").appendChild(div);
+        }
+    }
+    </script>
+</head>
+<body onload="loadCharts()">
+ <div id="wrapper">
+    {% include "pta/navigator.html" %}
+    <!--<div id="report">-->
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <p style="font-size:18px;margin-left:15px;">Progress in Post Traumatic Amnesia assessments for <b> <i> {{patient.first_name}} {{patient.last_name}} </i></b></p>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-10">
+                    <div class="panel">
+                        <table id="patientRpt" border="1" style="border-collapse:collapse" align="center" cellspacing="2" cellpadding="2">
+                            <tr>
+                                <th align="left"> Date </th>
+                                <th align="left"> Correct Answers </th>
+                                <th align="left"> Total Questions </th>
+                                <th align="left"> Testing Therapist </th>
+                            </tr> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!--</div>-->
+</div>
+</body>
+    
+</body>
+</html>

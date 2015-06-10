@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff report</title>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+    
+    <script type="text/javascript" src="{% static 'js/jquery1.10.2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/pta.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/morrisCharts.js' %}"></script>
+
+    <script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+
+    function centerAlignCell(elem){
+        elem.align = "center";
+    }
+    function populateTable(tableId, responses) {
+
+        var addRow = function(table){ return table.insertRow(table.rows.length); }
+        var addCol = function(row, no) { return row.insertCell(no); }
+
+        var cenetreAlignCell = function(cell){
+            cell.align = "center";       
+        }
+
+        var table = document.getElementById(tableId);
+        for(var i=0; i< responses.length; i++) {
+            var resp = responses[i];
+            var row  = addRow(table);
+            //var row = table.insertRow(table.rows.length);
+            var row = addRow(table);
+            var dataCell = addCol(row, 0);
+            dataCell.innerText = resp.summary;
+        }
+    }
+    function loadCharts(){
+        var rptType = "{{reportType}}";
+        var drawGraphs = true;
+        var drawTables = true;
+        if(rptType == reportTypes.graphOnly) {
+            drawTables = false;
+        }
+        if(rptType == reportTypes.tableOnly){
+            drawGraphs = false;
+        }
+        var responses = []
+        var response = {};
+        var noOfResponses = 0;
+        {% for  summary in individualSumaries %}
+            var response = {};
+            response.summary = "{% autoescape off %}{{summary}} {% endautoescape %}";
+            responses.push(response);
+            noOfResponses++;
+        {% endfor %}
+
+        var patients = [];
+        {% for k,v in patientDict.items %}
+            var patient = new Object();
+            patient.name = "{{k}}"
+            patient.timeTaken = Math.abs("{{v}}")
+            patients.push(patient);
+        {% endfor %}
+        
+        
+        if(drawTables && patients.length >0){
+            populateTable("staffRpt", responses);
+        } else {
+            document.getElementById("staffRpt").innerHTML = "";
+        }
+
+        if(noOfResponses == 0){
+            var div = document.createElement("div");
+            div.id = "error";
+            div.setAttribute("style","width:900px; height:500px;");
+            div.innerHTML="<div class='row'> <h3> Error! Perhaps a new staff member, no assessments done by this staff</h3> </div>";
+            document.getElementById("report").innerHTML = "";
+            document.getElementById("report").appendChild(div);
+        }
+
+    }
+    </script>
+</head>
+
+<body onload="loadCharts()">
+    {% include "pta/navigator.html" %} 
+<div id="wrapper">
+    <div id="page-wrapper">
+        <div id="report">
+            
+
+            <div class="row">
+                <div class="col-lg-12">
+                 <h4> Staff PTA assessment performance report </h4>
+                </div>
+            </div>
+
+            <div class="row">    
+                <div class="col-lg-12">
+                    <h5> <i>{{summary}}</i></h5>
+                </div>
+            </div>
+
+            <div class="row">    
+                <table id="staffRpt" class="table table-bordered table-hover" border="1" style="border-collapse:collapse" align="center" cellspacing="2" cellpadding="2">
+                <tr>
+                    <th align="left"> Time taken to clear each patient </th>
+                </tr> 
+                </table>
+            </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<html>
+	<head>
+		<title> Login </title>
+		{% load staticfiles %}
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		{% load staticfiles %}
+    	{% include "pta/siteCss.html" %} 
+
+	    <link rel="stylesheet" href="{% static 'css/pta.css' %}" />
+	</head>
+	<body>
+		<form action="." method="post" id="id" name="form_name"  role="form"> {% csrf_token %}
+			<div class="panel" style="margin-left:10px;">
+			<h3> <strong>Welcome to the PTA application, please login to get started </strong></h3>
+				</div>
+			  <div class="row">
+	    <div class="small-6" style="margin-left:20px;">
+
+			<fieldset>
+				<legend>Enter your credentials:</legend>
+				<label for="username">Username: </label>
+				<input type="text" class="form-control" name="username" placeholder="username"/>
+				<label for="password">Password: </label>
+				<input type="password" class="form-control" name="password" placeholder="password"/>
+			</fieldset>
+			<input type="submit"  class="btn btn-default" value="Login" name="submit">
+		</form>
+
+
+	</div>
+</div>
+</body>
+</html>

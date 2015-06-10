@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home </title>
+    {% load staticfiles %}
+
+    {% include "pta/siteCss.html" %} 
+    <script  type="text/javascript">
+        function appendClientIdToLink(linkId, patientDropDownId){
+            var patientDDSelIndex = document.getElementById(patientDropDownId).selectedIndex;
+            console.log(patientDropDownId);
+            var patient = document.getElementById(patientDropDownId);
+            var linkElem = document.getElementById(linkId);
+            var selectedPatientId = patient.options[patientDDSelIndex].id;
+            var existingLink = linkElem.href;
+            var idx = existingLink.lastIndexOf("/")
+            var substr = existingLink.substr(0,idx+1)+selectedPatientId;
+            linkElem.href = substr;
+        }
+        function clearMessage(){
+            document.getElementById("questionaireAnsToday").innerHTML = "";
+            appendClientIdToLink('qLink',"currentpatients");
+        }
+        function populateElemWithCurrentDate(elemId){
+            var element = document.getElementById(elemId);
+            var date = new Date();
+            element.innerHTML = "<strong>"+date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()+"</strong>";
+        }
+        function load(){
+            var currentPatients = document.getElementById("currentpatients");
+            populateElemWithCurrentDate("cdate");
+            if(currentPatients) {
+                document.getElementById("currentpatients").onchange = clearMessage;
+            }
+            
+            if(currentPatients){
+                appendClientIdToLink('qLink',"currentpatients");
+            }
+        }
+
+    </script>
+</head>
+
+<body onload="load()">
+
+    <div id="wrapper">
+        {% include "pta/navigator.html" %} 
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Greetings therapist <i>{{user.first_name}} {{user.last_name}}</i></h1>
+                    <p>Today's date is: <label style="display:inline;" id="cdate"></label></p>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+            {% if qFinished %}
+                <div class="row">
+                    <div class="panel">
+                        <p class="startSpace" id="questionaireAnsToday">Questionnaire answered today by <b><i>{{name}}</b></i></p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="row">
+                    <div class="panel">
+                         <p class="startSpace" id="questionaireAnsToday"></p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bell fa-fw"></i> Notifications 
+                        </div>
+                        <div>
+                            {% if patientPerfSummaries %}
+                                <h5> <i class="fa fa-bolt fa-fw"></i> Currently there are <b><i>{{currentPtaPatients}} </i> </b> BI patients who have not cleared their post traumatic amnesia assessment</h5>
+                            {% else %}
+                                <h5> <i class="fa fa-bolt fa-fw"></i> There are no new notificaitons</h5>
+                            {% endif %}
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-striped">
+                                {% for summary in patientPerfSummaries %}
+                                    <tr>
+                                        <td><i class="fa fa-comment fa-fw"></i> {{summary}} </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        
+                        <!-- /.panel-body -->
+                    </div>
+                    {% if unclearedPatients %}
+                        <div class="panel panel-default">
+                            <a id="qLink" href="/pta/questionnaire/" class="btn btn-default"> Generate questionnaire for </a>
+                            <select style="width:200px;" id="currentpatients" onchange="appendClientIdToLink('qLInk','currentpatients')">
+                                {% for patient in unclearedPatients %}
+                                    <option selected="selected" id="{{patient.id}}"> {{patient.first_name}} {{patient.last_name}} </option>
+                                {% endfor %}  
+                            </select>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bell fa-fw"></i>Some patients that recently cleared PTA 
+                        </div>
+                        <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                <div class="list-group">
+                                    {% for clearedPatient in clearedPatients %}
+                                        <a href="#" class="list-group-item">
+                                            <i class="fa fa-bolt fa-fw"></i> {{clearedPatient.first_name}} {{clearedPatient.last_name}}
+                                            <span class="pull-right text-muted small"><em> on {{clearedPatient.clearingDate}}</em>
+                                            </span>
+                                        </a>
+                                    {% endfor%}
+                                   
+                                    </a>
+                                </div>
+                                <!--<a href="#" class="btn btn-default btn-block">View All Alerts</a>-->
+                            </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+                <!-- /.col-lg-4 -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+    <!-- /#wrapper -->
+
+</body>
+
+</html>

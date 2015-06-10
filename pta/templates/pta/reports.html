@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+	{% include "pta/jsIncludes.html" %} 
+	
+    <script  type="text/javascript">
+       var reportTypes = {
+	    		graphAndTable:"gAndT",
+	    		graphOnly:"g",
+	    		tableOnly:"t"
+	    	};
+	    	function cleanExistingURL(link, urlStrNotifier){
+	    		var idx = link.href.lastIndexOf(urlStrNotifier);
+	    		link.href = link.href.substr(0,idx+(urlStrNotifier.length+1));
+	    	}
+	    	function appendClientIdToLink(linkId,linkId2, linkId3, dropDownId, linkStrPart){
+	            var ddSelIndex = document.getElementById(dropDownId).selectedIndex;
+	            var dropDown = document.getElementById(dropDownId);
+	            
+	            var linkElem = document.getElementById(linkId);
+	            var linkElem2 = document.getElementById(linkId2);
+	            var linkElem3 = document.getElementById(linkId3);
+	            
+	            cleanExistingURL(linkElem,linkStrPart);
+				cleanExistingURL(linkElem2,linkStrPart);
+				cleanExistingURL(linkElem3,linkStrPart);
+
+	            var selectedDDId = dropDown.options[ddSelIndex].id;
+	            var existingLink = linkElem.href;
+	            var idx = existingLink.lastIndexOf("/");
+	            var substr = existingLink.substr(0,idx+1)+selectedDDId;
+	            linkElem.href = substr+"/"+reportTypes.graphAndTable+"/";
+	            linkElem2.href = substr+"/"+reportTypes.graphOnly+"/";
+	            linkElem3.href = substr+"/"+reportTypes.tableOnly;
+		    }
+		    function loadInit(){
+			   	appendClientIdToLink('rptLink','rptLinkGraph','rptLinkTable','ptntRptId','patientRpt');
+			   	appendClientIdToLink('staffRptLink','staffRptLinkGraph','staffRptLinkTable','staffRptId','staffRpt');
+
+			   	var date = new Date();
+			   	var toDate = new Date(date.getFullYear(),date.getMonth(),date.getDate(), 12);
+			   	var fromDate = new Date(date.getFullYear(),date.getMonth(),(date.getDate()-1), 12);
+            	document.getElementById("toDate").valueAsDate = toDate;
+            	document.getElementById("fromDate").valueAsDate = fromDate;
+		    }
+
+    </script>
+</head>
+
+<body onload="loadInit()">
+    {% include "pta/navigator.html" %} 
+ <div id="wrapper">
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+			    <h2> PTA Reporting</h2>
+			    <hr>
+                </div>
+
+            </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-12">
+                    <div class="panel">
+                        <h4> Patient reports</h4>
+			        	<div class="panel">
+			        		<p> This report can shows how the patient performs in the PTA assessment over time.</p>
+			        	</div>
+			            
+			            <div class="panel">    
+			            <span>
+			            	<label for="ptntRptId" class="small button topSpace">Patient to report on:</label></span>
+			                    <select style="width:200px;" class="topSpace" id="ptntRptId" onchange="appendClientIdToLink('rptLink',
+			                    'rptLinkGraph','rptLinkTable','ptntRptId','patientRpt')">
+			                    {% for patient in allPatients %}
+			                        <option selected="selected" id="{{patient.id}}"> {{patient.first_name}} {{patient.last_name}} </option>
+			                    {% endfor %}
+			                    </select>
+			            </div>
+			            <div class="panel">
+				            <a href="/pta/patientRpt/" id="rptLink" class="btn btn-primary"> View Graphs and Tables </a>
+				            <a href="/pta/patientRpt/" id="rptLinkGraph" class="btn btn-primary"> View Graphs</a>
+				            <a href="/pta/patientRpt/" id="rptLinkTable" class="btn btn-primary"> View Tables</a>
+			        	</div>
+			        	<hr>
+                    </div>
+                </div>
+           </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <form method="post" action"/pta/questionResponses/">{% csrf_token %}
+	                <div class="col-lg-12">
+	                    <div class="panel">
+	                        <h4> Question responses report</h4>
+				        	<div class="panel">
+				        		<p> This report can shows how each patient responded to a question.</p>
+				        	</div>
+				            
+				            <div class="panel">    
+	
+		                    <label >From: </label>&nbsp;&nbsp;<input type="date" id="fromDate"> </input>
+		                    &nbsp;&nbsp;&nbsp;&nbsp;
+		                    <label >To: </label>&nbsp;&nbsp;
+		                    <input type="date" id="toDate"></input>
+				            </div>
+					          	<div class="panel">    
+					            <span>
+					            	<label for="ptntRptId" class="small button topSpace">Patient to report on:</label></span>
+					                    <select style="width:200px;" class="topSpace" id="ptntRptId" onchange="appendClientIdToLink('rptLink',
+					                    'rptLinkGraph','rptLinkTable','ptntRptId','patientRpt')">
+					                    {% for patient in allPatients %}
+					                        <option selected="selected" id="{{patient.id}}"> {{patient.first_name}} {{patient.last_name}} </option>
+					                    {% endfor %}
+					                    </select>
+					            </div>
+				            <!--<input type ="submit" class="btn btn-primary" value="View Graphs and Tables">-->
+				            <a href="/pta/questionResponses/323121/12312" id="rptLink" class="btn btn-primary"> View Demo </a>
+				        	<hr>
+	                    </div>
+	                </div>
+            	</form>
+           </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel">
+                        <h4>Staff reports</h4>
+			        	<div class="panel">
+			        		<h5> This report shows a breakdown of the average time taken by the therapist's patient to clear PTA.</h5>
+			        	</div>
+						<div class="panel">
+			            	<span><label for="ptntRptId" class="small button topSpace">Staff to report on:</label></span>
+
+		                    <select style="width:200px;" class="topSpace" id="staffRptId" onchange="appendClientIdToLink('staffRptLink',
+		                    'staffRptLinkGraph','staffRptLinkTable','staffRptId','staffRpt')">
+		                    {% for s in staff %}
+		                        <option selected="selected" id="{{s.id}}"> {{s.user.first_name}} {{s.user.last_name}} ({{s.user.username}}) </option>
+		                    {% endfor %}
+	                    </select>
+	                	</div>
+	                	<div class="panel">
+			            	<p>
+				            	<a href="/pta/staffRpt/" id="staffRptLink" class="btn btn-primary" style="display:none;"> View Graphs and Tables </a>
+					            <a href="/pta/staffRpt/" id="staffRptLinkGraph" class="btn btn-primary" style="display:none;"> View Graphs</a>
+					            <a href="/pta/staffRpt/" id="staffRptLinkTable" class="btn btn-primary"> View Staff Summary Report</a>
+			        		</p>
+			        	<hr>
+			        	</div>
+			        </div>
+                    </div>
+                </div>
+            
+           </div>
+        </div>
+
+        <!-- /#page-wrapper -->
+    </div>
+</body>
+</html>

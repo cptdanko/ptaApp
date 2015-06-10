@@ -1,0 +1,124 @@
+<html>
+<head>
+    <title>PTA</title>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/pta.css' %}" />
+    {% include "pta/jsIncludes.html" %} 
+    <script type="text/javascript" src="{% static 'js/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/pta.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/morrisCharts.js' %}"></script>
+
+    <script type="text/javascript">
+
+    </script>
+</head>
+<body>
+    {% include "pta/navigator.html" %} 
+ <div id="wrapper">
+    <div id="report">
+        <div id="page-wrapper">
+            <div class="row">
+                <div id="bar-example"></div>
+            </div>
+            <div class="row">
+                
+                    <H3>Progress in PTA assessments for <b> <i> Demo Patient</i></b></H3>
+                
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="row">
+                <h4> For Week ending 25th April, 2014
+            </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-10">
+                    <div class="panel table-responsive">
+                        <table id="patientRpt" class="table table-bordered table-hover" border="1" style="border-collapse:collapse" align="center" cellspacing="2" cellpadding="2">
+                            <tr>
+                                <th align="left"> Question </th>
+                                <th align="left"> Monday </th>
+                                <th align="left"> Tuesday </th>
+                                <th align="left"> Wednesday </th>
+                                <th align="left"> Thursday </th>
+                                <th align="left"> Friday </th>
+                                <th align="left">  Score </th>
+                            </tr> 
+                            <tr>
+                                <td> What day is it today? </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-remove"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> 4</td>
+                            </tr> 
+                            <tr>
+                                <td> What was picture card 1? </td>
+                                <td align="center"> <span class="glyphicon glyphicon-remove"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-remove"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> 3</td>
+                            </tr> 
+                            <tr>
+                                <td> What was picture card 2? </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-remove"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-remove"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> 3</td>
+                            </tr> 
+
+                             <tr>
+                                <td>What time of the day is it? </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> 5</td>
+                            </tr> 
+
+                            <tr>
+                                <td>Where are you? </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> 5</td>
+                            </tr> 
+                            <tr>
+                                <td>What year are we in? </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> <span class="glyphicon glyphicon-ok"> </td>
+                                <td align="center"> 5</td>
+                            </tr> 
+                            <tr>
+                                <td>Total score</td>
+                                <td align="center"> 5 </td>
+                                <td align="center"> 4 </td>
+                                <td align="center"> 5 </td>
+                                <td align="center"> 5 </td>
+                                <td align="center"> 6 </td>
+                                <td align="center"> 25</td>
+                            </tr> 
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+    
+</body>
+</html>

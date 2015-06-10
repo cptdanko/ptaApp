@@ -1,0 +1,189 @@
+<html>
+<head>
+    <title>Patient Report</title>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/pta.css' %}" />
+    {% include "pta/jsIncludes.html" %} 
+    <script type="text/javascript" src="{% static 'js/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/pta.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/morrisCharts.js' %}"></script>
+
+    <script type="text/javascript">
+
+    function createCharts(responses) {
+        var noOfResponses = responses.length;
+        var remainder = (noOfResponses/7).toFixed(2);
+        var divCollection = [];
+        var noOfCharts = Math.floor(remainder);
+        if(remainder != noOfCharts){
+            noOfCharts +=1;
+        }
+ 
+        var divChartId = "chart";
+        for(var i= 0; i < noOfCharts; i++){
+            var container = document.createElement("div");
+            var containerId = "graphContainer_"+i;
+            container.id = containerId;
+            container.className+="graph-container";
+            document.getElementById("page-wrapper").appendChild(container);
+
+            var header = document.createElement("div");
+            header.id ="header_"+i;
+            header.innerHTML = "<div class='caption'><h4> Patient performance progress</h4></div>"
+            document.getElementById(containerId).appendChild(header);
+
+            var div = document.createElement("div");
+            div.id = divChartId +"_"+i;
+            div.setAttribute("style","width:900px; height:500px;");
+            
+            document.getElementById(containerId).appendChild(div);
+            var respLimit = 7;
+            if(responses.length < 7){
+                respLimit = responses.length;
+            }
+            var barGraphRows = [];
+            for(var j=0; j < respLimit; j++) {
+                var response = responses.pop();
+                var row = {
+                    y: response.date,
+                    a: response.correctAnswers,
+                    b: response.totalQuestions
+                };
+                barGraphRows.push(row);
+            }  
+            Morris.Bar({
+                element: div.id,
+                data:barGraphRows,
+                xkey: 'y',
+                ykeys: ['a', 'b'],
+                labels: ['Correct Answers', 'Total Question'],
+            });
+        }
+    }
+    function centerAlignCell(elem){
+        elem.align = "center";
+    }
+    function populateTable(tableId, responses) {
+
+        var addRow = function(table){ return table.insertRow(table.rows.length); }
+        var addCol = function(row, no) { return row.insertCell(no); }
+
+        var cenetreAlignCell = function(cell){
+            cell.align = "center";       
+        }
+
+        var table = document.getElementById(tableId);
+        for(var i=0; i< responses.length; i++) {
+            var resp = responses[i];
+            var row  = addRow(table);
+            //var row = table.insertRow(table.rows.length);
+            var row = addRow(table);
+            var dataCell = addCol(row, 0);
+            //var dateCell = row.insertCell(0);
+            dataCell.innerText = resp.date;
+            var correctAnsCell = addCol(row, 1);
+
+            correctAnsCell.innerText = resp.correctAnswers;
+            correctAnsCell = centerAlignCell(correctAnsCell);
+
+            var totalQuestions = addCol(row, 2);
+            totalQuestions.innerHTML = resp.totalQuestions;
+            totalQuestions = centerAlignCell(totalQuestions);
+
+            var score = addCol(row, 3);
+            score.innerHTML = resp.correctAnswers;
+            score = centerAlignCell(score);
+
+            var assessingTherapist = addCol(row, 4);
+            assessingTherapist.innerHTML = resp.therapistName;
+            assessingTherapist = centerAlignCell(assessingTherapist);
+        }
+    }
+    function loadCharts(){
+        
+        var rptType = "{{reportType}}";
+        var drawGraphs = true;
+        var drawTables = true;
+        if(rptType == reportTypes.graphOnly) {
+            drawTables = false;
+        }
+        if(rptType == reportTypes.tableOnly){
+            drawGraphs = false;
+        }
+        var responses = []
+        var response = {};
+        var noOfResponses = 0;
+        {% for  r in responses %}
+            var response = {};
+            var datetime = "{{r.date.day}}/{{r.date.month}}/{{r.date.year}} {{r.date.time}}";
+            
+            response.date = datetime;
+            response.correctAnswers = {{r.correctAnswers}}
+            response.totalQuestions = {{r.totalQuestions}}
+            response.therapistName = "{{r.staff.first_name}}"+" "+ "{{r.staff.last_name}}"
+            responses.push(response);
+            noOfResponses++;
+        {% endfor %}
+
+        if(noOfResponses == 0){
+            var div = document.createElement("div");
+            div.id = "error";
+            div.setAttribute("style","width:900px; height:500px;");
+            div.innerHTML="<div class='panel'> <h3> Error! Perhaps a new patient, no assessments have been recorded for this patient</h3> </div>";
+            document.getElementById("page-wrapper").innerHTML = "";
+            document.getElementById("page-wrapper").appendChild(div);
+        }
+        if(drawTables){
+            populateTable("patientRpt", responses);
+        } else {
+            document.getElementById("patientRpt").innerHTML = "";
+        }
+        
+        
+        if(drawGraphs) {
+            createCharts(responses);
+        }
+    }
+    </script>
+</head>
+<body onload="loadCharts()">
+    {% include "pta/navigator.html" %} 
+ <div id="wrapper">
+    <div id="report">
+        <div id="page-wrapper">
+            <div class="row">
+                <div id="bar-example"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p style="font-size:18px;margin-left:15px;">Progress in Post Traumatic Amnesia assessments for <b> <i> {{patient.first_name}} {{patient.last_name}} </i></b></p>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-10">
+                    <div class="panel table-responsive">
+
+                        <table id="patientRpt" class="table table-bordered table-hover" border="1" style="border-collapse:collapse" align="center" cellspacing="2" cellpadding="2">
+                            <tr>
+                                <th align="left"> Date </th>
+                                <th align="left"> Correct Answers </th>
+                                <th align="left"> Total Questions </th>
+                                
+                                <th align="left"> Score </th>
+                                <th align="left"> Testing Therapist </th>
+                            </tr> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+    
+</body>
+</html>

@@ -1,0 +1,197 @@
+<html>
+<head>
+    <title>Questionaire</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript">
+        var ANSWER_RIGHT = 1;
+        var ANSWER_WRONG = 0;
+        var multipleChoiceMap = {};
+
+        function load(){
+            var element = document.getElementById("cdate");
+            var date = new Date();
+            element.innerHTML = "<strong>"+date.getDate()+"/"+date.getMonth()+1+"/"+date.getFullYear()+"</strong>";
+
+            {% for q in questions %}
+                {% if q.answers|length > 0 %}
+                    {% for answer in q.answers %}
+                        populateAnswers('{{q.question.name}}','{{answer.text}}');
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        }
+        function populateAnswers(question, answer){
+            if(multipleChoiceMap[question]){
+                var existingValue = multipleChoiceMap[question];
+                existingValue.push(answer);
+            } else{
+                var answers = new Array();
+                answers.push(answer);
+                multipleChoiceMap[question] = answers;
+            }
+            
+        }
+        /* despite the hard work, this function is not being used right now*/
+        function answerClicked(id, answerType){
+            var rightAnswer = document.getElementById("correctAnswers").value;
+            var question = id.substring(0, id.indexOf("_"))
+            /*var id = id.replace("_yes","");
+            id = id.replace("_no", "");*/
+            var answerType = Math.abs(answerType);
+
+            if(answerType == ANSWER_RIGHT){
+                if(rightAnswer.indexOf(question) < 0){
+                    if(rightAnswer.length == 0){
+                        rightAnswer+= question;
+                    } else{
+                        rightAnswer+= ","+question;
+                    }
+                }
+            } else{
+                var length = rightAnswer.length;
+                rightAnswer = rightAnswer.replace(question+",", '');
+                if(length == rightAnswer.length){
+                    rightAnswer = rightAnswer.replace(question, '');
+                }
+                if(rightAnswer.charAt(rightAnswer.length-1)== ','){
+                    rightAnswer = rightAnswer.substring(0, rightAnswer.length-1);
+                }
+
+            }
+            document.getElementById("correctAnswers").value = rightAnswer;
+        }
+        function selectAllQs(){
+            var checkboxes = document.getElementsByTagName("INPUT");
+            for(var i=0; i<checkboxes.length;i++){
+                if(checkboxes[i].type=="checkbox"){
+                    //checkboxes[i].checked = true;
+                    checkboxes[i].click();
+                }
+            }
+        }
+        function hearQuestionAndAnswer(question, languageCode){
+            var answers = multipleChoiceMap[question];
+            if(answers){
+                speak("Greetings, for the question "+question+" these are the choices", languageCode);
+                var fistValDone = false;
+                for(var idx= 0; idx<answers.length;idx++){
+                    var answer = answers[idx];
+                    var text = "";
+                    if(!fistValDone) {
+                        var text= "Is it "+answer;
+                        fistValDone = true;
+                    } else{
+                        var text = " or "+answer    
+                    }
+                    speak(text, languageCode);
+                }
+                speak("Please select one of the choices", languageCode);
+            }
+
+        }
+        function speak(text, languageCode){
+            var msg = new SpeechSynthesisUtterance(text);
+            msg.lang= languageCode;
+            msg.rate = 0.8;
+            window.speechSynthesis.speak(msg);
+        }
+        function hearQuestion(question, languageCode){
+
+            var msg = new SpeechSynthesisUtterance(question);
+            msg.rate = 0.8;
+            /*msg.pitch = 1;
+            msg.volume = 1;*/
+            msg.lang= languageCode;
+            
+            window.speechSynthesis.speak(msg);
+        }
+    </script>
+    {% load staticfiles %}
+    {% include "pta/siteCss.html" %} 
+    <link rel="stylesheet" href="{% static 'css/pta.css' %}" />
+    
+</head>
+<body onload="load()">
+    {% include "pta/navigator.html" %} 
+ <div id="wrapper">
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3> Post Traumatic Amnesia assessment <br> questionnaire for patient<br>
+                    <i>{{patient.first_name}} {{patient.last_name}} </i></h3>
+
+                    <p>on:<label id="cdate"></label></>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <div class="row">
+                <!-- /.col-lg-8 -->
+                <div class="col-lg-10">
+                    <table class="table">
+                    <form onsubmit="submit()" action="." method="post" id="id" name="form_name"> {% csrf_token %}
+                        
+                        {% for q in questions %}
+                        <tr>
+                            <!--<input onclick="rightAnswer(id, this)" type="checkbox" name="{{q.name}}" id="{{q.id}}" value="{{q.id}}" />-->
+                            <td><label> {{q.question.name}}</label> </td>
+                            <td>
+                                <button  style="width:100%;"  type="button" class="btn btn-default" onclick="hearQuestion('{{q.question.name}}','{{patient.language.language_code}}')">
+                                    <span class="glyphicon glyphicon-volume-up"></span> Hear 
+                                </button>
+                                {% if q.answers|length > 0 %}
+                                     <button  style="width:100%;"  type="button" class="btn btn-default" onclick="hearQuestionAndAnswer('{{q.question.name}}','{{patient.language.language_code}}')">
+                                        <span class="glyphicon glyphicon-volume-up"></span>  Hear All Answers
+                                    </button>
+
+                                {% endif %}
+                            </td>
+                        </tr>
+                            {% if q.answers|length > 0 %}
+                                {% for answer in q.answers %}
+                                    <tr>
+                                        <td>
+                                            {% if answer.isAnswerRight %}
+                                                <input type="radio" name="{{q.question.name}}" id="{{q.question.id}}_{{answer.id}}" onclick="answerClicked(id, '1')"/>
+                                                <label for="{{q.question.id}}_{{answer.id}}" class="label label-success" >{{answer.text}}</label>
+                                            {% else %}   
+                                                <input name="{{q.question.name}}" type="radio" onclick="answerClicked(id, '0')" id="{{q.question.id}}_{{answer.id}}"/>
+                                                <label for="{{q.question.id}}_{{answer.id}}" class="label label-success">{{answer.text}}</label>
+                                            {% endif %}
+                                            
+                                        </td>
+                                        <td>
+                                            <button  style="width:100%;"  type="button" class="btn btn-default" onclick="hearQuestion('{{answer.text}}', '{{patient.language.language_code}}')" >
+                                                <span class="glyphicon glyphicon-volume-up"></span> Hear 
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %} 
+                                <tr>
+                                    <td colspan="2"> 
+                                        <input onclick="answerClicked(id, '1')" type="radio" name="{{q.question.name}}" id="{{q.question.id}}_yes" value="{{q.question.id}}"/>
+                                        <label for="{{q.question.id}}_yes" class="label label-success">Answer Correct?</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input type="radio" onclick="answerClicked(id, '0')" name="{{q.question.name}}" id="{{q.question.id}}_no"/>
+                                        <label for="{{q.question.id}}_no" class="label label-danger">Wrong Answer? </label>
+                                    </td>
+                                </tr>
+                             {% endif %}   
+                        {% endfor %}
+                         </table>   
+                        <input type="input" style="display:none;" id="correctAnswers" name="correctAnswers" value=""/>
+                        <p style="margin-top:10px;">
+                            <input type="submit" class="btn btn-primary" value="Done" />
+                        </p>
+                    </form>
+                </div>
+            </div>
+                
+            </div>
+        </div>
+        <!-- /#page-wrapper -->
+</body>
+</html>
