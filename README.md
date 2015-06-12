@@ -25,7 +25,6 @@ License
 The BSD 3-Clause License
 
 
-**Free Software, Hell Yeah!**
 [Morris.js]:http://morrisjs.github.io/morris.js/
 [Python/Django]:https://www.djangoproject.com/
 [Twitter Bootstrap]:http://twitter.github.com/bootstrap/
