@@ -17,8 +17,6 @@ This is the first project for which I used the morris.js charting library and I 
 
 
 
-
-
 License
 ----
 

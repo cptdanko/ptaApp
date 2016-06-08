@@ -13,7 +13,6 @@ from random import shuffle
 
 def method(sender, **keywords):
 	print sender
-	print "**********************"
 
 post_save.connect(method, User)
 def logMeOut(request):
@@ -79,16 +78,10 @@ def staffRpt(request,staff, reportType):
 	s = Staff.objects.get(pk=staff)
 	uniquePatients = set()
 	messages  =[]
-	print s
-	print staff
 	
 	for entry in PTAQuestionaire.objects.all():
 		print entry.staff
 	qsDone = PTAQuestionaire.objects.filter(staff = s.user)
-	print "qsDone"
-	print qsDone
-	print "staff"
-	print staff
 	patientsCleared = 0
 	patientClearingTime = []
 	for qs in qsDone:
@@ -101,7 +94,6 @@ def staffRpt(request,staff, reportType):
 	patientDict = {}
 	
 	for patient  in uniquePatients:
-		print patient
 		
 		patientQuestionnaires = PTAQuestionaire.objects.filter(patient = patient).order_by('-date')[:3]
 		dateDiff = patientQuestionnaires[0].date - patientQuestionnaires[2].date
@@ -109,8 +101,6 @@ def staffRpt(request,staff, reportType):
 		name  = patient.first_name+" "+ patient.last_name
 		patientDict[name] = minutesTaken
 		message = "Patient '"+ patient.first_name +" "+patient.last_name +"' took "+str(minutesTaken)+" minutes to celar the PTA assessment"
-		print "staff report"
-		print message
 		messages.append(message)
 		clearingTotal += minutesTaken
 
@@ -124,10 +114,6 @@ def staffRpt(request,staff, reportType):
 	return render_to_response("pta/staffReport.html",{"staff":s,"summary":staffSummary, "individualSumaries":messages, "reportType":reportType,"patientDict":patientDict}, context_instance = RequestContext(request))
 
 def questionResponses(request, fromDate, toDate):
-	print request.POST
-	print "in questionResponses"
-	print fromDate
-	print toDate
 	return render_to_response("pta/patientRespDemo.html",locals(), context_instance = RequestContext(request))
 
 def search(request):
@@ -159,8 +145,6 @@ def questionnaire(request, patient):
 		qDict = {"question": q, "answers": ans}
 		questionsWithAnswers.append(qDict)
 
-	print request.POST
-	
 	questionMap = {}
 	
 	if request.POST:
